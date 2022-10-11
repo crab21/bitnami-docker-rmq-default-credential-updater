@@ -11,6 +11,10 @@ jobs:
      steps:
        - name: Checkout repository
          uses: actions/checkout@v3
+       - name: Get current date
+         id: date
+         run: echo "::set-output name=today::$(date +'%Y%m%d%H%M')"
+         shell: bash
        - name: Set up QEMU
          uses: docker/setup-qemu-action@v2
          with:
@@ -30,8 +34,8 @@ jobs:
          env:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
          with:
-           tag_name: v0.0.1
-           release_name: Release v0.0.1
+           tag_name: v0.0.${{ steps.date.outputs.today }}
+           release_name: Release v0.0.${{ steps.date.outputs.today }}
            draft: false
            prerelease: false
 
