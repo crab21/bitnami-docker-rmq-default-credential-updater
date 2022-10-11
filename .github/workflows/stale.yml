@@ -1,20 +1,37 @@
-name: 'Close stale issues and PRs'
+name: ci
+
 on:
-  schedule:
-    - cron: '0 1 * * *'
+  push:
+    branches:
+      - master
 
 jobs:
-  stale:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/stale@v3
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          stale-issue-message: 'This Issue has been automatically marked as "stale" because it has not had recent activity (for 15 days). It will be closed if no further activity occurs. Thanks for the feedback.'
-          stale-pr-message: 'This Pull Request has been automatically marked as "stale" because it has not had recent activity (for 15 days). It will be closed if no further activity occurs. Thank you for your contribution.'
-          close-issue-message: 'Due to the lack of activity in the last 5 days since it was marked as "stale", we proceed to close this Issue. Do not hesitate to reopen it later if necessary.'
-          close-pr-message: 'Due to the lack of activity in the last 5 days since it was marked as "stale", we proceed to close this Pull Request. Do not hesitate to reopen it later if necessary.'
-          days-before-stale: 15
-          days-before-close: 5
-          exempt-issue-labels: 'on-hold'
-          exempt-pr-labels: 'on-hold'
+  buildx:
+     runs-on: ubuntu-latest
+     steps:
+       - name: Checkout repository
+         uses: actions/checkout@v3
+       - name: Set up QEMU
+         uses: docker/setup-qemu-action@v2
+         with:
+          platforms: 'arm64,arm'
+       - name: Set up Docker Buildx
+         uses: docker/setup-buildx-action@v2
+       - name: cd
+         run: |
+          cd 1/scratch
+          docker build --no-cache -t  rmq-default-credential-updater:v1 .
+          docker save -o rmq-default-credential-updater.tar rmq-default-credential-updater:v1 
+          cd ../
+       - name: Create Release
+         if: ${{ steps.response_info_1.outputs.run_project_b_build == 'true' }}
+         id: create_release
+         uses: actions/create-release@v1
+         env:
+           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+         with:
+           tag_name: v0.0.1
+           release_name: Release v0.0.1
+           body_path: 1/scratch/rmq-default-credential-updater.tar
+           draft: false
+           prerelease: false
