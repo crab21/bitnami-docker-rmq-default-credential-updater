@@ -24,8 +24,6 @@ jobs:
           docker save -o rmq-default-credential-updater.tar rmq-default-credential-updater:v1 
           cd ../
        - name: Create Release
-         if: ${{ steps.response_info_1.outputs.run_project_b_build == 'true' }}
-         id: create_release
          uses: actions/create-release@v1
          env:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
