@@ -1,4 +1,4 @@
-FROM bitnami/minideb:bullseye as builder
+FROM jbbgameich/minideb:latest-amd64 as builder
 
 COPY prebuildfs /
 
